@@ -6,17 +6,28 @@ using Masroofy.Models;
 
 namespace Masroofy.Services
 {
+    /// <summary>
+    /// Manages creation, editing and deletion of expense transactions.
+    /// </summary>
     public class ExpenseManager
     {
         private readonly DatabaseManager _db;
         private readonly List<Transaction> _transactions;
 
+        /// <summary>
+        /// Constructs an ExpenseManager and loads persisted transactions.
+        /// </summary>
+        /// <param name="db">Database manager used for persistence.</param>
         public ExpenseManager(DatabaseManager db)
         {
             _db = db ?? throw new ArgumentNullException(nameof(db));
             _transactions = _db.LoadTransactions() ?? new List<Transaction>();
         }
 
+        /// <summary>
+        /// Returns all transactions ordered most-recent-first.
+        /// </summary>
+        /// <returns>Read-only list of transactions.</returns>
         public IReadOnlyList<Transaction> GetAllTransactions()
         {
             return _transactions
@@ -25,11 +36,23 @@ namespace Masroofy.Services
                 .AsReadOnly();
         }
 
+        /// <summary>
+        /// Finds a transaction by id.
+        /// </summary>
+        /// <param name="id">Transaction identifier.</param>
+        /// <returns>Transaction or null if not found.</returns>
         public Transaction GetTransactionById(int id)
         {
             return _transactions.FirstOrDefault(t => t.Id == id);
         }
 
+        /// <summary>
+        /// Adds a new transaction to the store.
+        /// </summary>
+        /// <param name="amount">Amount of the transaction.</param>
+        /// <param name="note">Optional note.</param>
+        /// <param name="category">Category name.</param>
+        /// <returns>Created transaction object.</returns>
         public Transaction AddTransaction(double amount, string note, string category)
         {
             if (amount <= 0)
@@ -45,6 +68,14 @@ namespace Masroofy.Services
             return transaction;
         }
 
+        /// <summary>
+        /// Edits an existing transaction.
+        /// </summary>
+        /// <param name="id">Transaction id.</param>
+        /// <param name="amount">New amount.</param>
+        /// <param name="note">New note.</param>
+        /// <param name="category">New category.</param>
+        /// <param name="date">Optional new date.</param>
         public void EditTransaction(int id, double amount, string note, string category, DateTime? date = null)
         {
             var tx = _transactions.FirstOrDefault(t => t.Id == id);
@@ -66,6 +97,11 @@ namespace Masroofy.Services
             PersistTransactions();
         }
 
+        /// <summary>
+        /// Deletes a transaction by id.
+        /// </summary>
+        /// <param name="id">Transaction id to delete.</param>
+        /// <returns>True if deleted; false if not found.</returns>
         public bool DeleteTransaction(int id)
         {
             var tx = _transactions.FirstOrDefault(t => t.Id == id);
